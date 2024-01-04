@@ -30,8 +30,26 @@ Resilience4j의 서킷 브레이커는 유한 상태 머신을 통해 구현되�
 > - Time-based sliding window
 >   슬라이딩 윈도우의 길이를 정한 후 해당 기간 동안의 실패율을 계산하여 특정 임계치에 도달했는지를 계산한다.
 
+### Property
+| property | description |
+| --- | --- |
+| failureRateThreshold | 실패 비율 임계치를 백분율로 설정 해당 값을 넘어갈 시 Circuit Breaker 는 Open 상태로 전환되며, 이때부터 호출을 차단한다 (기본값: 50) |
+| slowCallRateThreshold | 임계값을 백분율로 설정, CircuitBreaker는 호출에 걸리는 시간이 slowCallDurationThreshold보다 길면 느린 호출로 간주,해당 값을 넘어갈 시 Circuit Breaker 는 Open상태로 전환되며, 이때부터 호출을 차단한다 (기본값: 100) |
+| slowCallDurationThreshold | 호출에 소요되는 시간이 설정한 임계치보다 길면 느린 호출로 계산.응답시간이 느린 것으로 판단할 기준 시간 (60초, 1000 ms = 1 sec) (기본값: 60000[ms]) |
+| permittedNumberOfCallsInHalfOpenState | HALF_OPEN 상태일 때, OPEN/CLOSE 여부를 판단하기 위해 허용할 호출 횟수를 설정 수 (기본값: 10) |
+| maxWaitDurationInHalfOpenState | HALF_OPEN 상태로 있을 수 있는 최대 시간이다. 0일 때 허용 횟수만큼 호출을 모두 완료할 때까지 HALF_OEPN 상태로 무한정 기다린다. (기본값: 0) |
+| slidingWindowType | sliding window 타입을 결정한다. COUNT_BASED인 경우 slidingWindowSize 만큼의 마지막 call들이 기록되고 집계된다.TIME_BASED인 경우 마지막 slidingWindowSize초 동안의 call들이 기록되고 집계됩니다. (기본값: COUNT_BASED) |
+| slidingWindowSize | CLOSED 상태에서 집계되는 슬라이딩 윈도우 크기를 설정한다. (기본값: 100) |
+| minimumNumberOfCalls | minimumNumberOfCalls 이상의 요청이 있을 때부터 faiure/slowCall rate를 계산.예를 들어, 해당 값이 10이라면 최소한 호출을 10번을 기록해야 실패 비율을 계산할 수 있다.기록한 호출 횟수가 9번뿐이라면 9번 모두 실패했더라도 circuitbreaker는 열리지 않는다. (기본값: 100) |
+| waitDurationInOpenState | OPEN에서 HALF_OPEN 상태로 전환하기 전 기다리는 시간 (60초, 1000 ms = 1 sec) (기본값: 60000[ms]) |
+| recordExceptions | 실패로 기록할 Exception 리스트 (기본값: empty) |
+| ignoreExceptions | 실패나 성공으로 기록하지 않을 Exception 리스트 (기본값: empty) |
+| ignoreException | 기록하지 않을 Exception을 판단하는 Predicate을 설정 (커스터마이징, 기본값: throwable -> true) |
+| recordFailure | 어떠한 경우에 Failure Count를 증가시킬지 Predicate를 정의해 CircuitBreaker에 대한 Exception Handler를 재정의.true를 return할 경우, failure count를 증가시키게 된다 (기본값: false) |
+
 application.yml을 통한 서킷 브레이커 예제
 ```
+#application.yml
 resilience4j:
   circuit breaker:
     configs:
@@ -48,10 +66,17 @@ resilience4j:
         base-config: default
 ```
 ## Retry
+요청 실패 시 재시도 처리 기능을 제공한다.
 ## TimeLimiter
+실행 시간에 대한 제한을 설정할 수 있는 기능을 제공한다.
 ## Bulkhead
+동시에 실행할 수 있는 횟수 제한을 설정할 수 있는 기능을 제공한다.
 ## RateLimiter
+제한치를 넘어 요청을 거부하거나 Queue를 생성하여 처리하는 기능을 제공한다.
+## Cache
+결과를 캐싱하는 기능을 제공한다.
 
 # Ref
 - https://mangkyu.tistory.com/290#:~:text=%5B%20Resilience4J%EB%9E%80%3F%20%5D,%ED%8C%A8%ED%84%B4%EC%9D%84%20%EC%9C%84%ED%95%B4%20%EC%82%AC%EC%9A%A9%EB%90%9C%EB%8B%A4.
 - https://velog.io/@akfls221/resilience4j-%EB%A1%9C-%EC%95%8C%EC%95%84%EB%B3%B4%EB%8A%94-%EC%84%9C%ED%82%B7%EB%B8%8C%EB%A0%88%EC%9D%B4%EC%BB%A4%ED%8C%A8%ED%84%B4CircuitBreaker
+- https://oliveyoung.tech/blog/2023-08-31/circuitbreaker-inventory-squad/
