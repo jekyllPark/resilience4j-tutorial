@@ -1,0 +1,56 @@
+logging:
+  level:
+    root: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuit-breakers:
+      enabled: true
+    rate limiters:
+      enabled: true
+
+resilience4j:
+  circuit breaker:
+    configs:
+      default:
+        failure-rate-threshold: 50
+        minimum-number-of-calls: 5
+        automatic-transition-from-open-to-half-open-enabled: true
+        wait-duration-in-open-state: 5s
+        permitted-number-of-calls-in-half-open-state: 3
+        sliding-window-size: 10
+        sliding-window-type: count_based
+    instances:
+      CircuitBreakerService:
+        base-config: default
+  retry:
+    instances:
+      retryApi:
+        max-attempts: 3
+        wait-duration: 1s
+    metrics:
+      legacy:
+        enabled: true
+      enabled: true
+  time limiter:
+    metrics:
+      enabled: true
+    instances:
+      timeLimiterApi:
+        timeout-duration:
+          seconds: :2s
+        cancel-running-future: true
+  bulkhead:
+    metrics:
+      enabled: true
+    instances:
+      bulkheadApi:
+        max-concurrent-calls: 3
+        max-wait-duration: 1s

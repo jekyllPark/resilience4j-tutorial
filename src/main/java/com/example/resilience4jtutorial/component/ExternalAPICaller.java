@@ -16,4 +16,14 @@ public class ExternalAPICaller {
     public String callApi() {
         return restTemplate.getForObject("/api/external", String.class);
     }
+
+    public String callApiWithDelay() {
+        String result = restTemplate.getForObject("/api/external", String.class);
+        try {
+            Thread.sleep(5000L);
+            return result;
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
